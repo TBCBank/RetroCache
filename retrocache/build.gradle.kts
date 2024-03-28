@@ -1,10 +1,14 @@
+import com.android.build.gradle.internal.scope.publishBuildArtifacts
+import io.grpc.internal.SharedResourceHolder.release
+
 plugins {
     id("java-library")
     id("org.jetbrains.kotlin.jvm")
+    id("maven-publish")
 }
 
 group = "ge.tbcbank.retrocache"
-version "1.0.0"
+version "1.0"
 
 dependencies {
     val okhttp = "4.11.0"
@@ -21,4 +25,17 @@ dependencies {
 java {
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17
+}
+
+afterEvaluate {
+    publishing {
+        publications {
+            create<MavenPublication>("release") {
+                from(components["java"])
+                groupId = "com.github.TBCBank"
+                artifactId = "RetroCache"
+                version = "1.0"
+            }
+        }
+    }
 }

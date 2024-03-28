@@ -3,10 +3,16 @@
 Kotlin library that provides caching capabilities for Retrofit requests. With this library, you can annotate your Retrofit service methods to specify caching behavior for responses, enhancing the performance and efficiency of your network calls.
 
 ### Add library to the project
-[Download latest version [1.0] JAR file](https://github.com/TBCBank/RetroCache/releases/download/v1.0/retrocache-1.0.jar) and add it in module's /libs directory, then implement in build.gradle.kts:
+project level gradle:
+```gradle
+repositories {
+    maven { url = uri("https://jitpack.io") }
+}
+```
+module level gradle:
 ```gradle
 dependencies {
-    implementation(files("libs/retrocache-1.0.jar"))
+    implementation("com.github.TBCBank:RetroCache:1.0.0")
 }
 ```
 > Project will be added to Maven Central in future

@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "ge.tbcbank.retrocache"
-version "1.0"
+version "1.0.1"
 
 dependencies {
     val okhttp = "4.11.0"
@@ -34,7 +34,7 @@ afterEvaluate {
                 from(components["java"])
                 groupId = "com.github.TBCBank"
                 artifactId = "RetroCache"
-                version = "1.0"
+                version = "1.0.1"
             }
         }
     }

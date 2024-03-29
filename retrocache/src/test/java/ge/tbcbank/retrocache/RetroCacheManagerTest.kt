@@ -1,5 +1,6 @@
 package ge.tbcbank.retrocache
 
+import okhttp3.Protocol
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
@@ -12,7 +13,7 @@ class RetroCacheManagerTest {
     @Test
     fun `get returns cached object when present`() {
         val cacheManager = RetroCacheManager.Builder().build()
-        val model = RetroCacheValue("test", "123")
+        val model = getRetroCacheModel()
         cacheManager["key"] = model
 
         val cachedModel = cacheManager["key"]
@@ -23,12 +24,14 @@ class RetroCacheManagerTest {
     @Test
     fun `get returns null when object expired`() {
         val cacheManager = RetroCacheManager.Builder().build()
-        val model =
-            RetroCacheValue(
-                "test",
-                "123",
-                expirationTime = System.currentTimeMillis() - 1000
-            )
+        val model = RetroCacheValue(
+            responseJson = "test",
+            responseCode = 200,
+            responseProtocol = Protocol.HTTP_1_1,
+            responseHeaders = arrayOf(),
+            tag = "123",
+            expirationTime = System.currentTimeMillis() - 1000
+        )
         cacheManager["key"] = model
 
         val cachedModel = cacheManager["key"]
@@ -39,8 +42,8 @@ class RetroCacheManagerTest {
     @Test
     fun `set adds object to cache`() {
         val cacheManager = RetroCacheManager.Builder().build()
-        val model = RetroCacheValue("test", "123")
 
+        val model = getRetroCacheModel()
         cacheManager["key"] = model
 
         val cachedModel = cacheManager["key"]
@@ -50,7 +53,7 @@ class RetroCacheManagerTest {
     @Test
     fun `remove removes object from cache`() {
         val cacheManager = RetroCacheManager.Builder().build()
-        val model = RetroCacheValue("test", "123")
+        val model = getRetroCacheModel()
         cacheManager["key"] = model
 
         cacheManager.remove("key")
@@ -59,11 +62,19 @@ class RetroCacheManagerTest {
         assertNull(cachedModel)
     }
 
+    private fun getRetroCacheModel(responseJson: String = "test", tag: String = "123") = RetroCacheValue(
+        responseJson = responseJson,
+        responseCode = 200,
+        responseProtocol = Protocol.HTTP_1_1,
+        responseHeaders = arrayOf(),
+        tag = tag
+    )
+
     @Test
     fun `clearAll removes all objects from cache`() {
         val cacheManager = RetroCacheManager.Builder().build()
-        cacheManager["key1"] = RetroCacheValue("test1", "123")
-        cacheManager["key2"] = RetroCacheValue("test2", "456")
+        cacheManager["key1"] = getRetroCacheModel("test1", "123")
+        cacheManager["key2"] = getRetroCacheModel("test2", "456")
 
         cacheManager.clearAll()
 
@@ -74,9 +85,9 @@ class RetroCacheManagerTest {
     @Test
     fun `clearAllByTag removes objects with specified tag`() {
         val cacheManager = RetroCacheManager.Builder().build()
-        cacheManager["key1"] = RetroCacheValue("test1", tag = "tag1")
-        cacheManager["key2"] = RetroCacheValue("test2", tag = "tag1")
-        cacheManager["key3"] = RetroCacheValue("test3", tag = "tag2")
+        cacheManager["key1"] = getRetroCacheModel("test1", tag = "tag1")
+        cacheManager["key2"] = getRetroCacheModel("test2", tag = "tag1")
+        cacheManager["key3"] = getRetroCacheModel("test3", tag = "tag2")
 
         cacheManager.clearAllByTag("tag1")
 
@@ -108,9 +119,9 @@ class RetroCacheManagerTest {
     @Test
     fun `last accessed object is moved to top of cache`() {
         val cacheManager = RetroCacheManager.Builder().build()
-        cacheManager["key1"] = RetroCacheValue("test1")
-        cacheManager["key2"] = RetroCacheValue("test2")
-        cacheManager["key3"] = RetroCacheValue("test3")
+        cacheManager["key1"] = getRetroCacheModel("test1")
+        cacheManager["key2"] = getRetroCacheModel("test2")
+        cacheManager["key3"] = getRetroCacheModel("test3")
 
         var first: RetroCacheValue? = null
         var last: RetroCacheValue? = null
@@ -139,12 +150,12 @@ class RetroCacheManagerTest {
     @Test
     fun `old cached responses are removed if maxMemory limit has reached`() {
         val cacheManager = RetroCacheManager.Builder()
-            .maxMemorySize(100 * 1024) // 100 kb max memory size
-            .maxObjectSize(1 * 1024) // 1 kb max memory size
+            .maxMemorySize(100 * sizeOfObject(getRetroCacheModel(get1KbString()))) // fits 100 object
+            .maxObjectSize(1 * sizeOfObject(getRetroCacheModel(get1KbString())))
             .build()
 
         (0..110).forEach {// add 10 items more than limit
-            cacheManager[it.toString()] = RetroCacheValue(oneKbString)
+            cacheManager[it.toString()] = getRetroCacheModel(get1KbString())
         }
 
         (0..110).forEach {
@@ -163,9 +174,8 @@ class RetroCacheManagerTest {
             .maxObjectSize(1 * 1024) // 1 kb max memory size
             .build()
 
-        val invalidSizedString = oneKbString + "12345"
-        cacheManager["key"] = RetroCacheValue(invalidSizedString)
-        println(sizeOfObject(RetroCacheValue(invalidSizedString)))
+        val invalidSizedString = get1KbString() + "12345"
+        cacheManager["key"] = getRetroCacheModel(invalidSizedString)
         assertNull(cacheManager["key"])
     }
 
@@ -180,62 +190,11 @@ class RetroCacheManagerTest {
     }
 
 
-    companion object {
-        private val oneKbString = """
-                {
-                  "id": 123,
-                  "name": "John Doe",
-                  "email": "johndoe@example.com",
-                  "age": 30,
-                  "address": {
-                    "street": "123 Main St",
-                    "city": "Anytown",
-                    "country": "USA"
-                  }
-                }
-                {
-                  "id": 123,
-                  "name": "John Doe",
-                  "email": "johndoe@example.com",
-                  "age": 30,
-                  "address": {
-                    "street": "123 Main St",
-                    "city": "Anytown",
-                    "country": "USA"
-                  }
-                }
-                {
-                  "id": 123,
-                  "name": "John Doe",
-                  "email": "johndoe@example.com",
-                  "age": 30,
-                  "address": {
-                    "street": "123 Main St",
-                    "city": "Anytown",
-                    "country": "USA"
-                  }
-                }
-                {
-                  "id": 123,
-                  "name": "John Doe",
-                  "email": "johndoe@example.com",
-                  "age": 30,
-                  "address": {
-                    "street": "123 Main St",
-                    "city": "Anytown",
-                    "country": "USA"
-                  }
-                }
-                {
-                  "id": 123,
-                  "name": "John Doe",
-                  "email": "johndoe@example.com",
-                  "age": 30,
-                  "address": {
-                    "street": "123 Main St",
-                    "city": "Anytown",
-                  }1111111
-                }
-            """.trimIndent()
+    private fun get1KbString(): String {
+        val stringBuilder = StringBuilder()
+        repeat(1024) {
+            stringBuilder.append('a')
+        }
+        return stringBuilder.toString()
     }
 }

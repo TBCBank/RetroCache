@@ -1,7 +1,7 @@
 package ge.tbcbank.retrocache
 
+import okhttp3.Headers
 import okhttp3.Interceptor
-import okhttp3.Protocol
 import okhttp3.RequestBody
 import okhttp3.Response
 import okhttp3.ResponseBody.Companion.toResponseBody
@@ -29,11 +29,12 @@ class RetroCacheInterceptor(
                 val cachedData = retroCacheManager[key].takeIf { fromCache }
                 if (cachedData != null) {
                     Response.Builder()
-                        .code(200)
-                        .request(request)
                         .message("From RetroCache")
+                        .request(request)
+                        .code(cachedData.responseCode)
                         .body(cachedData.responseJson?.toResponseBody())
-                        .protocol(Protocol.HTTP_1_1)
+                        .protocol(cachedData.responseProtocol)
+                        .headers(Headers.headersOf(*cachedData.responseHeaders))
                         .build()
                 } else {
                     val response = chain.proceed(request)
@@ -42,6 +43,9 @@ class RetroCacheInterceptor(
                             responseJson = response
                                 .peekBody(retroCacheManager.maxObjectSizeBytes.toLong())
                                 .string(),
+                            responseCode = response.code,
+                            responseProtocol = response.protocol,
+                            responseHeaders = response.headers.toArray(),
                             tag = cacheAnnotation.tag.ifEmpty { null },
                             expirationTime = getCacheTime(cacheAnnotation, cachePolicy),
                         )
@@ -54,6 +58,15 @@ class RetroCacheInterceptor(
                 chain.proceed(request)
             }
         }
+    }
+
+    private fun Headers.toArray(): Array<String> {
+        val headerList = mutableListOf<String>()
+        forEach {
+            headerList.add(it.first)
+            headerList.add(it.second)
+        }
+        return headerList.toTypedArray()
     }
 
     private fun getCacheTime(cacheAnnotation: Cache, cachePolicy: CachePolicy?): Long? {

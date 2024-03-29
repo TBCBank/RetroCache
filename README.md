@@ -12,7 +12,7 @@ repositories {
 module level gradle:
 ```gradle
 dependencies {
-    implementation("com.github.TBCBank:RetroCache:1.0.0")
+    implementation("com.github.TBCBank:RetroCache:1.0.1")
 }
 ```
 > Project will be added to Maven Central in future

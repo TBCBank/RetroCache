@@ -62,12 +62,17 @@ class RetroCacheManagerTest {
         assertNull(cachedModel)
     }
 
-    private fun getRetroCacheModel(responseJson: String = "test", tag: String = "123") = RetroCacheValue(
+    private fun getRetroCacheModel(
+        responseJson: String = "test",
+        tag: String = "123",
+        scope: String = ""
+    ) = RetroCacheValue(
         responseJson = responseJson,
         responseCode = 200,
         responseProtocol = Protocol.HTTP_1_1,
         responseHeaders = arrayOf(),
-        tag = tag
+        tag = tag,
+        scope = scope
     )
 
     @Test
@@ -90,6 +95,21 @@ class RetroCacheManagerTest {
         cacheManager["key3"] = getRetroCacheModel("test3", tag = "tag2")
 
         cacheManager.clearAllByTag("tag1")
+
+        assertNull(cacheManager["key1"])
+        assertNull(cacheManager["key2"])
+        assertEquals("test3", cacheManager["key3"]?.responseJson)
+    }
+
+    @Test
+    fun `clearScope removes objects within specific scope`() {
+        val cacheManager = RetroCacheManager.Builder().build()
+        val scope = "user"
+        cacheManager["key1"] = getRetroCacheModel("test1", tag = "tag1", scope = scope)
+        cacheManager["key2"] = getRetroCacheModel("test2", tag = "tag1", scope = scope)
+        cacheManager["key3"] = getRetroCacheModel("test3", tag = "tag2", scope = "otherScope")
+
+        cacheManager.clearScopeCache(scope = scope)
 
         assertNull(cacheManager["key1"])
         assertNull(cacheManager["key2"])

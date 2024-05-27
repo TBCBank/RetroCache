@@ -64,6 +64,12 @@ class MainActivity : ComponentActivity() {
                         }
 
                         Button(onClick = {
+                            viewModel.clearScope()
+                        }) {
+                            Text(text = "Clear scope")
+                        }
+
+                        Button(onClick = {
                             viewModel.refresh()
                         }) {
                             Text(text = "Refresh")

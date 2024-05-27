@@ -63,6 +63,12 @@ class RetroCacheManager private constructor(
         }
     }
 
+    fun clearScopeCache(scope: String) {
+        lruCache.snapshot().forEach {
+            if (it.value.scope == scope) lruCache.remove(it.key)
+        }
+    }
+
     fun clearAll() {
         lruCache.evictAll()
     }

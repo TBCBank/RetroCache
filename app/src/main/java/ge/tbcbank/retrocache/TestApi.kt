@@ -6,7 +6,7 @@ import retrofit2.http.Path
 
 interface TestApi {
 
-    @Cache(tag = "mtag")
+    @Cache(tag = "mtag", scope = "user_scope")
     @GET("search" + "/{query}/{page}")
     suspend fun getBookWithPage(
         @Path("page") page: String,

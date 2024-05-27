@@ -43,5 +43,7 @@ class MainViewModel : ViewModel() {
         retroCacheManager.clearAllByTag("mtag")
     }
 
-
+    fun clearScope() {
+        retroCacheManager.clearScopeCache("user_scope")
+    }
 }

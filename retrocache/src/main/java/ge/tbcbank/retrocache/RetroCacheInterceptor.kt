@@ -47,6 +47,7 @@ class RetroCacheInterceptor(
                             responseProtocol = response.protocol,
                             responseHeaders = response.headers.toArray(),
                             tag = cacheAnnotation.tag.ifEmpty { null },
+                            scope = cacheAnnotation.scope.ifEmpty { null },
                             expirationTime = getCacheTime(cacheAnnotation, cachePolicy),
                         )
                     }

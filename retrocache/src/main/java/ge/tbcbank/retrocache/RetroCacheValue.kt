@@ -9,6 +9,7 @@ data class RetroCacheValue(
     val responseProtocol: Protocol,
     val responseHeaders: Array<String>,
     val tag: String? = null,
+    val scope: String? = null,
     val expirationTime: Long? = null,
 ) : Serializable {
 

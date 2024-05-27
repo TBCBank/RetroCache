@@ -89,7 +89,7 @@ suspend fun getData(
 #### Clearing cache
 
 ```kotlin
-    retroCacheManager.clearAllByTag("tag1") // will remove all objects with corresponding tag
+retroCacheManager.clearAllByTag("tag1") // will remove all objects with corresponding tag
 
 retroCacheManager.clearAll() // will remove all objects from the cache
 ```
@@ -105,7 +105,7 @@ retroCacheManager.clearAll() // will remove all objects from the cache
 #### Scoping cache
 
 ```kotlin
-        @Cache(scope = "logged_in_user_scope") // specify scope in annotation
+@Cache(scope = "logged_in_user_scope") // specify scope in annotation
 @GET("fetch")
 suspend fun getData(): Response<Data>
 

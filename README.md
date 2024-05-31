@@ -55,7 +55,7 @@ The cache will automatically clear upon application termination.
 #### Annotation-based caching for Retrofit service methods
 
 ```kotlin
-    @Cache
+@Cache
 @GET("fetch")
 suspend fun getData(): Response<Data>
 ```
@@ -63,7 +63,7 @@ suspend fun getData(): Response<Data>
 #### Control cache with tags
 
 ```kotlin
-    @Cache(tag = "tag1")
+@Cache(tag = "tag1")
 @GET("fetch")
 suspend fun getData(): Response<Data>
 ```
@@ -71,7 +71,7 @@ suspend fun getData(): Response<Data>
 #### Define cache refresh time in milliseconds
 
 ```kotlin
-    @Cache(cacheTimeMillis = 60_000)
+@Cache(cacheTimeMillis = 60_000)
 @GET("fetch")
 suspend fun getData(): Response<Data>
 ```
@@ -79,7 +79,7 @@ suspend fun getData(): Response<Data>
 #### Dynamic control of caching and refreshing
 
 ```kotlin
-    @Cache
+@Cache
 @GET("fetch")
 suspend fun getData(
     @CacheControl cachePolicy: CachePolicy = CachePolicy.Refresh // will refresh data
